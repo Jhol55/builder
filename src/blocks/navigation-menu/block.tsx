@@ -146,6 +146,7 @@ registerBlockType('agency/navigation-menu', {
                 <div {...useBlockProps()}>
                     <Component
                         items={attributes.items}
+                        mode={undefined}
                     />
                 </div>
             </>
@@ -162,6 +163,7 @@ registerBlockType('agency/navigation-menu', {
                     __html: ReactDOMServer.renderToString(
                         <Component
                             items={attributes.items}
+                            mode={undefined}
                         />
                     )
                 }}

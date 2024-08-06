@@ -1,128 +1,174 @@
-import * as React from "react"
-import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu"
-import { cva } from "class-variance-authority"
-import { ChevronDown } from "lucide-react"
+'use client'
 
-import { cn } from "@/lib/utils"
+import React, { useState, createContext, useContext } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
-const NavigationMenu = React.forwardRef<
-  React.ElementRef<typeof NavigationMenuPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Root>
->(({ className, children, ...props }, ref) => (
-  <NavigationMenuPrimitive.Root
-    ref={ref}
-    className={cn(
-      "relative z-10 flex max-w-max flex-1 items-center justify-center",
-      className
-    )}
-    {...props}
-  >
-    {children}
-    <NavigationMenuViewport />
-  </NavigationMenuPrimitive.Root>
-))
-NavigationMenu.displayName = NavigationMenuPrimitive.Root.displayName
+const DirectionContext = createContext<{
+  direction: 'rtl' | 'ltr' | null;
+  setAnimationDirection: (tab: number | null) => void;
+} | null>(null);
 
-const NavigationMenuList = React.forwardRef<
-  React.ElementRef<typeof NavigationMenuPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.List>
->(({ className, ...props }, ref) => (
-  <NavigationMenuPrimitive.List
-    ref={ref}
-    className={cn(
-      "group flex flex-1 list-none items-center justify-center space-x-1",
-      className
-    )}
-    {...props}
-  />
-))
-NavigationMenuList.displayName = NavigationMenuPrimitive.List.displayName
+const CurrentTabContext = createContext<{
+  currentTab: number | null;
+} | null>(null);
 
-const NavigationMenuItem = NavigationMenuPrimitive.Item
+export const Dropdown: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [currentTab, setCurrentTab] = useState<null | number>(null);
+  const [direction, setDirection] = useState<'rtl' | 'ltr' | null>(null);
 
-const navigationMenuTriggerStyle = cva(
-  "group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
-)
+  const setAnimationDirection = (tab: number | null) => {
+    if (typeof currentTab === 'number' && typeof tab === 'number') {
+      setDirection(currentTab > tab ? 'rtl' : 'ltr');
+    } else if (tab === null) {
+      setDirection(null);
+    }
 
-const NavigationMenuTrigger = React.forwardRef<
-  React.ElementRef<typeof NavigationMenuPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
-  <NavigationMenuPrimitive.Trigger
-    ref={ref}
-    className={cn(navigationMenuTriggerStyle(), "group", className)}
-    {...props}
-  >
-    {children}{" "}
-    <ChevronDown
-      className="relative top-[1px] ml-1 h-3 w-3 transition duration-200 group-data-[state=open]:rotate-180"
-      aria-hidden="true"
-    />
-  </NavigationMenuPrimitive.Trigger>
-))
-NavigationMenuTrigger.displayName = NavigationMenuPrimitive.Trigger.displayName
+    setCurrentTab(tab);
+  };
 
-const NavigationMenuContent = React.forwardRef<
-  React.ElementRef<typeof NavigationMenuPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Content>
->(({ className, ...props }, ref) => (
-  <NavigationMenuPrimitive.Content
-    ref={ref}
-    className={cn(
-      "left-0 top-0 w-full data-[motion^=from-]:animate-in data-[motion^=to-]:animate-out data-[motion^=from-]:fade-in data-[motion^=to-]:fade-out data-[motion=from-end]:slide-in-from-right-52 data-[motion=from-start]:slide-in-from-left-52 data-[motion=to-end]:slide-out-to-right-52 data-[motion=to-start]:slide-out-to-left-52 md:absolute md:w-auto ",
-      className
-    )}
-    {...props}
-  />
-))
-NavigationMenuContent.displayName = NavigationMenuPrimitive.Content.displayName
+  return (
+    <DirectionContext.Provider value={{ direction, setAnimationDirection }}>
+      <CurrentTabContext.Provider value={{ currentTab }}>
+        <div
+          onMouseLeave={() => setAnimationDirection(null)}
+          className={'relative flex flex-col gap-2'}
+        >
+          {children}
+        </div>
+      </CurrentTabContext.Provider>
+    </DirectionContext.Provider>
+  );
+};
 
-const NavigationMenuLink = NavigationMenuPrimitive.Link
+export const TriggerWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { currentTab } = useContext(CurrentTabContext)!;
+  const { setAnimationDirection } = useContext(DirectionContext)!;
 
-const NavigationMenuViewport = React.forwardRef<
-  React.ElementRef<typeof NavigationMenuPrimitive.Viewport>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Viewport>
->(({ className, ...props }, ref) => (
-  <div className={cn("absolute left-0 top-full flex justify-center")}>
-    <NavigationMenuPrimitive.Viewport
-      className={cn(
-        "origin-top-center relative mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 md:w-[var(--radix-navigation-menu-viewport-width)]",
-        className
-      )}
-      ref={ref}
-      {...props}
-    />
-  </div>
-))
-NavigationMenuViewport.displayName =
-  NavigationMenuPrimitive.Viewport.displayName
+  return (
+    <>
+      {React.Children.map(children, (e, i) => (
+        <button
+          onMouseEnter={() => setAnimationDirection(i + 1)}
+          onClick={() => setAnimationDirection(i + 1)}
+          className={`flex h-10 items-center gap-0.5 rounded-md px-4 py-2 text-sm font-medium text-neutral-950 transition-colors dark:text-white ${currentTab === i + 1 ? 'bg-neutral-100 dark:bg-neutral-800 [&>svg]:rotate-180' : ''
+            }`}
+        >
+          {e}
+        </button>
+      ))}
+    </>
+  );
+};
 
-const NavigationMenuIndicator = React.forwardRef<
-  React.ElementRef<typeof NavigationMenuPrimitive.Indicator>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Indicator>
->(({ className, ...props }, ref) => (
-  <NavigationMenuPrimitive.Indicator
-    ref={ref}
-    className={cn(
-      "top-full z-[1] flex h-1.5 items-end justify-center overflow-hidden data-[state=visible]:animate-in data-[state=hidden]:animate-out data-[state=hidden]:fade-out data-[state=visible]:fade-in",
-      className
-    )}
-    {...props}
-  >
-    <div className="relative top-[60%] h-2 w-2 rotate-45 rounded-tl-sm bg-border shadow-md" />
-  </NavigationMenuPrimitive.Indicator>
-))
-NavigationMenuIndicator.displayName =
-  NavigationMenuPrimitive.Indicator.displayName
+export const Trigger: React.FC<{ children: React.ReactNode; className?: string }> = ({
+  children,
+  className
+}) => {
+  return (
+    <>
+      <span className={cn('', className)}>{children}</span>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="relative top-[1px] ml-1 h-3 w-3 transition-transform duration-200 "
+        aria-hidden="true"
+      >
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </>
+  );
+};
 
-export {
-  navigationMenuTriggerStyle,
-  NavigationMenu,
-  NavigationMenuList,
-  NavigationMenuItem,
-  NavigationMenuContent,
-  NavigationMenuTrigger,
-  NavigationMenuLink,
-  NavigationMenuIndicator,
-  NavigationMenuViewport,
-}
+export const Tabs: React.FC<{ children: React.ReactNode; className?: string; mode: 'expand' | 'overlay' | undefined }> = ({
+  children,
+  className,
+  mode
+}) => {
+  const { currentTab } = useContext(CurrentTabContext)!;
+  const { direction } = useContext(DirectionContext)!;
+  return (mode === 'expand' ?
+    <div className="relative w-full">
+      {React.Children.map(children, (e, i) => (
+        <AnimatePresence initial={false}>
+          {currentTab === i + 1 && (
+            <motion.div
+              initial={{ height: 0 }}
+              animate={{ height: 'auto' }}
+              exit={{ height: 0 }}
+              className="overflow-hidden"
+            >
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className={cn('rounded-md border border-neutral-200 p-2 backdrop-blur-xl transition-all duration-300 dark:border-neutral-800', className)}
+              >
+                {e}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      ))}
+    </div>
+    :
+    <motion.div
+      id="overlay-content"
+      initial={{
+        opacity: 0,
+        scale: 0.98
+      }}
+      animate={
+        currentTab
+          ? {
+            opacity: 1,
+            scale: 1
+          }
+          : { opacity: 0, scale: 0.98 }
+      }
+      className="absolute left-0 top-[calc(100%_+_6px)] w-auto">
+      <div className="absolute -top-[6px] left-0 right-0 h-[6px]" />
+      <div
+        className={cn(
+          'rounded-md border border-neutral-200 backdrop-blur-xl transition-all duration-300 dark:border-neutral-800',
+          className
+        )}>
+        {React.Children.map(children, (e, i) => (
+          <div className="overflow-hidden">
+            <AnimatePresence>
+              {currentTab !== null && (
+                <motion.div exit={{ opacity: 0 }}>
+                  {currentTab === i + 1 && (
+                    <motion.div
+                      initial={{
+                        opacity: 0,
+                        x: direction === 'ltr' ? 100 : direction === 'rtl' ? -100 : 0
+                      }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.2 }}>
+                      {e}
+                    </motion.div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ))}
+      </div>
+    </motion.div>);
+};
+
+export const Tab: React.FC<{ children: React.ReactNode; className?: string }> = ({
+  children,
+  className
+}) => {
+  return <div className={cn('h-full w-full', className)}>{children}</div>;
+};
