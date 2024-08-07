@@ -1,7 +1,7 @@
 import '../../style.css';
 import Component from './component';
 import { hydrateRoot } from 'react-dom/client';
-import { useMediaQuery } from '@reactuses/core';
+
 
 window.addEventListener('DOMContentLoaded', () => {
     const elements = document.querySelectorAll('#asd');

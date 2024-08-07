@@ -4,77 +4,60 @@ import React, { useState, createContext, useContext } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-const DirectionContext = createContext<{
-  direction: 'rtl' | 'ltr' | null;
-  setAnimationDirection: (tab: number | null) => void;
-} | null>(null);
-
-const CurrentTabContext = createContext<{
-  currentTab: number | null;
+const OpenTabContext = createContext<{
+  openTab: boolean;
+  setOpenTab: (open: boolean) => void;
 } | null>(null);
 
 const modeContext = createContext<{
   mode: string | undefined;
 } | undefined>(undefined);
 
-export const Dropdown: React.FC<{ mode: string | undefined, children: React.ReactNode }> = ({ mode, children }) => {
-  const [currentTab, setCurrentTab] = useState<null | number>(null);
-  const [direction, setDirection] = useState<'rtl' | 'ltr' | null>(null);
-
-  const setAnimationDirection = (tab: number | null) => {
-    if (typeof currentTab === 'number' && typeof tab === 'number') {
-      setDirection(currentTab > tab ? 'rtl' : 'ltr');
-    } else if (tab === null) {
-      setDirection(null);
-    }
-
-    setCurrentTab(tab);
-  };
-
-  return (
-    <DirectionContext.Provider value={{ direction, setAnimationDirection }}>
-      <CurrentTabContext.Provider value={{ currentTab }}>
-        <modeContext.Provider value={{ mode }}>
-          <div
-            onMouseLeave={() => mode === 'overlay' && setAnimationDirection(null)}
-            className={'relative flex flex-col gap-2'}
-          >
-            {children}
-          </div>
-        </modeContext.Provider>
-      </CurrentTabContext.Provider>
-    </DirectionContext.Provider>
-  );
-};
-
-export const TriggerWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { currentTab } = useContext(CurrentTabContext)!;
-  const { setAnimationDirection } = useContext(DirectionContext)!;
-  const { mode } = useContext(modeContext)!;
-
-  return (
-    <>
-      {React.Children.map(children, (e, i) => (
-        <button
-          onMouseEnter={() => mode === 'overlay' && setAnimationDirection(i + 1)}
-          onClick={() => setAnimationDirection(mode === 'expand' && currentTab ? null : i + 1)}
-          className={`flex h-10 items-center gap-0.5 rounded-md px-4 py-2 text-sm font-medium text-neutral-950 transition-colors dark:text-white hover:bg-neutral-100 hover:dark:bg-neutral-800 ${currentTab === i + 1 ? 'bg-neutral-100 dark:bg-neutral-800 [&>svg]:rotate-180' : ''
-            }`}
-        >
-          {e}
-        </button>
-      ))}
-    </>
-  );
-};
-
-export const Trigger: React.FC<{ children: React.ReactNode; className?: string }> = ({
+export const Navbar: React.FC<{ mode: string | undefined, children: React.ReactNode, className?: string }> = ({
+  mode,
   children,
   className
 }) => {
+
   return (
-    <>
-      <span className={cn('', className)}>{children}</span>
+    <modeContext.Provider value={{ mode }}>
+      <div className={cn('flex p-2 justify-end', mode === 'expand' ? 'flex-col' : 'flex-row', className)}>
+        {children}
+      </div>
+    </modeContext.Provider>
+  )
+}
+
+export const Dropdown: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [openTab, setOpenTab] = useState<boolean>(false);
+  const { mode } = useContext(modeContext)!;
+
+  return (
+    <OpenTabContext.Provider value={{ openTab, setOpenTab }}>
+      <div
+        onMouseLeave={() => mode === 'overlay' && setOpenTab(false)}
+        className={'relative flex flex-col gap-2'}
+      >
+        {children}
+      </div>
+    </OpenTabContext.Provider>
+  );
+};
+
+export const Trigger: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { openTab, setOpenTab } = useContext(OpenTabContext)!;
+  const { mode } = useContext(modeContext)!;
+
+  return (
+    <button
+      onMouseEnter={() => mode === 'overlay' && setOpenTab(true)}
+      onClick={() => setOpenTab(mode === 'expand' && openTab ? false : true)}
+      className={cn(
+        'flex h-10 items-center gap-0.5 rounded-md px-4 py-2 text-sm font-medium text-neutral-950 transition-colors dark:text-white hover:bg-neutral-100 hover:dark:bg-neutral-800',
+        openTab && 'bg-neutral-100 dark:bg-neutral-800 [&>svg]:rotate-180'
+      )}
+    >
+      <span>{children}</span>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -90,22 +73,22 @@ export const Trigger: React.FC<{ children: React.ReactNode; className?: string }
       >
         <path d="m6 9 6 6 6-6" />
       </svg>
-    </>
+    </button>
   );
 };
 
-export const Tabs: React.FC<{ children: React.ReactNode; className?: string }> = ({
+
+export const Tab: React.FC<{ children: React.ReactNode; className?: string }> = ({
   children,
   className,
 }) => {
-  const { currentTab } = useContext(CurrentTabContext)!;
-  const { direction } = useContext(DirectionContext)!;
+  const { openTab } = useContext(OpenTabContext)!;
   const { mode } = useContext(modeContext)!;
-  return (mode === 'expand' ?
-    <div className="relative w-full">
-      {React.Children.map(children, (e, i) => (
+  return (
+    mode === 'expand' ?
+      <div className="relative w-full">
         <AnimatePresence initial={false}>
-          {currentTab === i + 1 && (
+          {openTab && (
             <motion.div
               initial={{ height: 0 }}
               animate={{ height: 'auto' }}
@@ -118,65 +101,93 @@ export const Tabs: React.FC<{ children: React.ReactNode; className?: string }> =
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className={cn('rounded-md border border-neutral-200 mb-2 backdrop-blur-xl transition-all duration-300 dark:border-neutral-800', className)}
+                className={cn('flex flex-col gap-2 p-2 rounded-md border border-neutral-200 mb-2 backdrop-blur-xl transition-all duration-300 dark:border-neutral-800',
+                  className
+                )}
               >
-                {e}
+                {children}
               </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
-      ))}
-    </div>
-    :
-    <motion.div
-      id="overlay-content"
-      initial={{
-        opacity: 0,
-        scale: 0.98
-      }}
-      animate={
-        currentTab
-          ? {
-            opacity: 1,
-            scale: 1
-          }
-          : { opacity: 0, scale: 0.98 }
-      }
-      className="absolute left-0 top-[calc(100%_+_6px)] w-auto">
-      <div className="absolute -top-[6px] left-0 right-0 h-[6px]" />
-      <div
-        className={cn(
-          'rounded-md border border-neutral-200 backdrop-blur-xl transition-all duration-300 dark:border-neutral-800',
-          className
-        )}>
-        {React.Children.map(children, (e, i) => (
+      </div>
+      :
+      <motion.div
+        id="overlay-content"
+        initial={{
+          opacity: 0,
+          scale: 0.98
+        }}
+        animate={
+          openTab
+            ? {
+              opacity: 1,
+              scale: 1
+            }
+            : { opacity: 0, scale: 0.98 }
+        }
+        className="absolute left-0 top-[calc(100%_+_6px)] w-auto">
+        <div className="absolute -top-[6px] left-0 right-0 h-[6px]" />
+        <div
+          className={cn(
+            'rounded-md border border-neutral-200 backdrop-blur-xl transition-all duration-300 dark:border-neutral-800',
+            className
+          )}>
           <div className="overflow-hidden">
             <AnimatePresence>
-              {currentTab !== null && (
-                <motion.div exit={{ opacity: 0 }}>
-                  {currentTab === i + 1 && (
-                    <motion.div
-                      initial={{
-                        opacity: 0,
-                        x: direction === 'ltr' ? 100 : direction === 'rtl' ? -100 : 0
-                      }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.2 }}>
-                      {e}
-                    </motion.div>
-                  )}
+              {openTab && (
+                <motion.div
+                  exit={{ opacity: 0 }}>
+
+                  <motion.div
+                    className='flex flex-col gap-2 p-2'
+                    initial={{
+                      opacity: 0,
+                      x: 0
+                    }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.2 }}>
+                    {children}
+                  </motion.div>
+
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
-        ))}
-      </div>
-    </motion.div>);
+        </div>
+      </motion.div>);
 };
 
-export const Tab: React.FC<{ children: React.ReactNode; className?: string }> = ({
+export const TabLink: React.FC<{ children: React.ReactNode, href: string }> = ({
   children,
-  className
+  href
 }) => {
-  return <div className={cn('h-full w-full', className)}>{children}</div>;
+  const { mode } = useContext(modeContext)!;
+
+  return (
+    <a
+      href={href}
+      className='px-2 text-sm decoration-none'
+    >
+      {children}
+    </a>
+  )
 };
+
+export const Link: React.FC<{ children: React.ReactNode, href: string }> = ({
+  children,
+  href
+}) => {
+  const { mode } = useContext(modeContext)!;
+
+  return (
+    <a
+      href={href}
+      className={cn(
+        mode === 'expand' ? 'w-full' : 'w-auto items-center justify-center',
+        'inline-flex h-10 rounded-md bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground no-underline')}
+    >
+      {children}
+    </a>
+  )
+}
