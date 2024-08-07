@@ -13,7 +13,11 @@ const CurrentTabContext = createContext<{
   currentTab: number | null;
 } | null>(null);
 
-export const Dropdown: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const modeContext = createContext<{
+  mode: string | undefined;
+} | undefined>(undefined);
+
+export const Dropdown: React.FC<{ mode: string | undefined, children: React.ReactNode }> = ({ mode, children }) => {
   const [currentTab, setCurrentTab] = useState<null | number>(null);
   const [direction, setDirection] = useState<'rtl' | 'ltr' | null>(null);
 
@@ -30,12 +34,14 @@ export const Dropdown: React.FC<{ children: React.ReactNode }> = ({ children }) 
   return (
     <DirectionContext.Provider value={{ direction, setAnimationDirection }}>
       <CurrentTabContext.Provider value={{ currentTab }}>
-        <div
-          onMouseLeave={() => setAnimationDirection(null)}
-          className={'relative flex flex-col gap-2'}
-        >
-          {children}
-        </div>
+        <modeContext.Provider value={{ mode }}>
+          <div
+            onMouseLeave={() => mode === 'overlay' && setAnimationDirection(null)}
+            className={'relative flex flex-col gap-2'}
+          >
+            {children}
+          </div>
+        </modeContext.Provider>
       </CurrentTabContext.Provider>
     </DirectionContext.Provider>
   );
@@ -44,14 +50,15 @@ export const Dropdown: React.FC<{ children: React.ReactNode }> = ({ children }) 
 export const TriggerWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentTab } = useContext(CurrentTabContext)!;
   const { setAnimationDirection } = useContext(DirectionContext)!;
+  const { mode } = useContext(modeContext)!;
 
   return (
     <>
       {React.Children.map(children, (e, i) => (
         <button
-          onMouseEnter={() => setAnimationDirection(i + 1)}
-          onClick={() => setAnimationDirection(i + 1)}
-          className={`flex h-10 items-center gap-0.5 rounded-md px-4 py-2 text-sm font-medium text-neutral-950 transition-colors dark:text-white ${currentTab === i + 1 ? 'bg-neutral-100 dark:bg-neutral-800 [&>svg]:rotate-180' : ''
+          onMouseEnter={() => mode === 'overlay' && setAnimationDirection(i + 1)}
+          onClick={() => setAnimationDirection(mode === 'expand' && currentTab ? null : i + 1)}
+          className={`flex h-10 items-center gap-0.5 rounded-md px-4 py-2 text-sm font-medium text-neutral-950 transition-colors dark:text-white hover:bg-neutral-100 hover:dark:bg-neutral-800 ${currentTab === i + 1 ? 'bg-neutral-100 dark:bg-neutral-800 [&>svg]:rotate-180' : ''
             }`}
         >
           {e}
@@ -87,13 +94,13 @@ export const Trigger: React.FC<{ children: React.ReactNode; className?: string }
   );
 };
 
-export const Tabs: React.FC<{ children: React.ReactNode; className?: string; mode: 'expand' | 'overlay' | undefined }> = ({
+export const Tabs: React.FC<{ children: React.ReactNode; className?: string }> = ({
   children,
   className,
-  mode
 }) => {
   const { currentTab } = useContext(CurrentTabContext)!;
   const { direction } = useContext(DirectionContext)!;
+  const { mode } = useContext(modeContext)!;
   return (mode === 'expand' ?
     <div className="relative w-full">
       {React.Children.map(children, (e, i) => (
@@ -103,6 +110,7 @@ export const Tabs: React.FC<{ children: React.ReactNode; className?: string; mod
               initial={{ height: 0 }}
               animate={{ height: 'auto' }}
               exit={{ height: 0 }}
+              transition={{ duration: 0.2 }}
               className="overflow-hidden"
             >
               <motion.div
@@ -110,7 +118,7 @@ export const Tabs: React.FC<{ children: React.ReactNode; className?: string; mod
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className={cn('rounded-md border border-neutral-200 p-2 backdrop-blur-xl transition-all duration-300 dark:border-neutral-800', className)}
+                className={cn('rounded-md border border-neutral-200 mb-2 backdrop-blur-xl transition-all duration-300 dark:border-neutral-800', className)}
               >
                 {e}
               </motion.div>

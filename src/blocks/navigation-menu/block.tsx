@@ -142,6 +142,7 @@ registerBlockType('agency/navigation-menu', {
                         </Button>
                     </div>
                 </InspectorControls>
+                
 
                 <div {...useBlockProps()}>
                     <Component
