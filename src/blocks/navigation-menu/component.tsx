@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useMediaQuery } from '@reactuses/core';
-import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerTrigger, DrawerTitle } from '@/components/ui/drawer';
 import { MenuIcon } from 'lucide-react';
 import { Navbar, Dropdown, Tab, Trigger, TabLink, Link } from '@/components/ui/navigation-menu';
 
@@ -50,6 +50,7 @@ const Wrapper = (Component: React.ComponentType<ComponentProps>) => memo((props:
                         aria-describedby={undefined}
                         onInteractOutside={() => setOpen(false)}
                     >
+                        <DrawerTitle className='hidden' />
                         <Component {...props} mode='expand' />
                     </DrawerContent>
                 </Drawer>
@@ -72,7 +73,10 @@ const Component = memo(({ items, mode, className }: ComponentProps) => {
                             <Tab>
                                 {item.subItems?.map((subItem, subIndex) => {
                                     return (
-                                        <TabLink key={subIndex} href={subItem.link}>
+                                        <TabLink
+                                            key={subIndex}
+                                            href={subItem.link}
+                                        >
                                             {subItem.label}
                                         </TabLink>
                                     )
@@ -80,7 +84,10 @@ const Component = memo(({ items, mode, className }: ComponentProps) => {
                             </Tab>
                         </Dropdown>
                     :
-                        <Link key={index} href={item.link}>
+                        <Link
+                            key={index}
+                            href={item.link}
+                        >
                             {item.label}
                         </Link>
                 )

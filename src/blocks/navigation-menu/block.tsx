@@ -4,7 +4,7 @@ import Component from "./component";
 const { __ } = wp.i18n;
 const { registerBlockType } = wp.blocks;
 const { useBlockProps, InspectorControls } = wp.blockEditor;
-const { PanelBody, ToggleControl, TextControl, Button, IconButton } = wp.components;
+const { PanelBody, ToggleControl, TextControl, Button } = wp.components;
 
 interface SubItem {
     label: string;

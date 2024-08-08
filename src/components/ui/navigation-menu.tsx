@@ -21,7 +21,13 @@ export const Navbar: React.FC<{ mode: string | undefined, children: React.ReactN
 
   return (
     <modeContext.Provider value={{ mode }}>
-      <div className={cn('flex p-2 justify-end', mode === 'expand' ? 'flex-col' : 'flex-row', className)}>
+      <div className={cn(
+        'flex p-2', 
+        mode === 'expand' 
+          ? 'flex-col justify-start h-[calc(100vh-12rem)] overflow-auto' 
+          : 'flex-row justify-end h-auto', 
+        className)}
+      >
         {children}
       </div>
     </modeContext.Provider>
@@ -111,22 +117,12 @@ export const Tab: React.FC<{ children: React.ReactNode; className?: string }> = 
           )}
         </AnimatePresence>
       </div>
-      :
+    :
       <motion.div
         id="overlay-content"
-        initial={{
-          opacity: 0,
-          scale: 0.98
-        }}
-        animate={
-          openTab
-            ? {
-              opacity: 1,
-              scale: 1
-            }
-            : { opacity: 0, scale: 0.98 }
-        }
-        className="absolute left-0 top-[calc(100%_+_6px)] w-auto">
+        className="absolute left-0 top-[calc(100%_+_6px)] w-auto"
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={ openTab ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.98 }}>
         <div className="absolute -top-[6px] left-0 right-0 h-[6px]" />
         <div
           className={cn(
@@ -155,19 +151,19 @@ export const Tab: React.FC<{ children: React.ReactNode; className?: string }> = 
             </AnimatePresence>
           </div>
         </div>
-      </motion.div>);
+      </motion.div>
+  );
 };
 
 export const TabLink: React.FC<{ children: React.ReactNode, href: string }> = ({
   children,
   href
 }) => {
-  const { mode } = useContext(modeContext)!;
 
   return (
     <a
       href={href}
-      className='px-2 text-sm decoration-none'
+      className='px-2 py-1 text-sm decoration-none rounded-md text-sm font-medium text-neutral-500 hover:bg-neutral-100 hover:dark:bg-neutral-800'
     >
       {children}
     </a>
