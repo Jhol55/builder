@@ -65,33 +65,30 @@ const Wrapper = (Component: React.ComponentType<ComponentProps>) => memo((props:
 const Component = memo(({ items, mode, className }: ComponentProps) => {
     return (
         <Navbar mode={mode} className={className}>
-            {items.map((item, index) => {
-                return (
-                    item.trigger ?
-                        <Dropdown key={index}>
-                            <Trigger>{item.label}</Trigger>
-                            <Tab>
-                                {item.subItems?.map((subItem, subIndex) => {
-                                    return (
-                                        <TabLink
-                                            key={subIndex}
-                                            href={subItem.link}
-                                        >
-                                            {subItem.label}
-                                        </TabLink>
-                                    )
-                                })}
-                            </Tab>
-                        </Dropdown>
-                    :
-                        <Link
-                            key={index}
-                            href={item.link}
-                        >
-                            {item.label}
-                        </Link>
+            {items.map((item, index) => (
+                item.trigger ? (
+                    <Dropdown key={index}>
+                        <Trigger>{item.label}</Trigger>
+                        <Tab>
+                            {item.subItems?.map((subItem, subIndex) => (
+                                <TabLink
+                                    key={subIndex}
+                                    href={subItem.link}
+                                >
+                                    {subItem.label}
+                                </TabLink>
+                            ))}
+                        </Tab>
+                    </Dropdown>
+                ) : (
+                    <Link
+                        key={index}
+                        href={item.link}
+                    >
+                        {item.label}
+                    </Link>
                 )
-            })}
+            ))}
         </Navbar>
     );
 });

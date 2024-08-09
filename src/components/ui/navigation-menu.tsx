@@ -19,12 +19,12 @@ export const Navbar: React.FC<{ mode: string | undefined, children: React.ReactN
   className
 }) => {
 
-  return ( // VER SCROLLBAR
+  return (
     <modeContext.Provider value={{ mode }}>
       <div className={cn(
         'flex p-2 gap-1', 
         mode === 'expand' 
-          ? 'flex-col justify-start h-[calc(100vh-8rem)] overflow-auto' 
+          ? 'flex-col justify-start h-[calc(100vh-8rem)] overflow-scroll' 
           : 'flex-row justify-end h-auto', 
         className)}
       >
