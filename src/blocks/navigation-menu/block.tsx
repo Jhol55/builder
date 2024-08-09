@@ -42,11 +42,22 @@ registerBlockType('agency/navigation-menu', {
         const onDragEnd = (result: DropResult) => {
             if (!result.destination) return;
 
-            const newItems = [...attributes.items];
-            const [reorderedItem] = newItems.splice(result.source.index, 1);
-            newItems.splice(result.destination.index, 0, reorderedItem);
+            const { source, destination } = result;
 
-            setAttributes({ items: newItems });
+            if (source.droppableId === 'items' && destination.droppableId === 'items') {
+                // Reordena os itens principais
+                const newItems = [...attributes.items];
+                const [reorderedItem] = newItems.splice(source.index, 1);
+                newItems.splice(destination.index, 0, reorderedItem);
+                setAttributes({ items: newItems });
+            } else if (source.droppableId.startsWith('subItems-') && destination.droppableId.startsWith('subItems-')) {
+                // Reordena os subitens
+                const itemIndex = parseInt(source.droppableId.split('-')[1], 10);
+                const newItems = [...attributes.items];
+                const [reorderedSubItem] = newItems[itemIndex].subItems.splice(source.index, 1);
+                newItems[itemIndex].subItems.splice(destination.index, 0, reorderedSubItem);
+                setAttributes({ items: newItems });
+            }
         };
 
         const addItem = () => {
@@ -91,7 +102,11 @@ registerBlockType('agency/navigation-menu', {
                             {(provided) => (
                                 <div {...provided.droppableProps} ref={provided.innerRef}>
                                     {attributes.items.map((item, index) => (
-                                        <Draggable key={index} draggableId={`item-${index}`} index={index}>
+                                        <Draggable
+                                            key={index}
+                                            draggableId={`item-${index}`}
+                                            index={index}
+                                        >
                                             {(provided) => (
                                                 <div
                                                     className='relative'
@@ -104,8 +119,15 @@ registerBlockType('agency/navigation-menu', {
                                                     >
                                                         <Move className="w-4 h-4" />
                                                     </div>
-                                                    <span className='absolute top-4 left-1/2 -translate-x-1/2 font-medium'>{item.label}</span>
-                                                    <PanelBody initialOpen={false} title={<span className='h-4' />}>
+                                                    <span
+                                                        className='absolute top-4 left-1/2 -translate-x-1/2 max-w-[calc(100%-6rem)] font-medium truncate'
+                                                    >
+                                                        {item.label}
+                                                    </span>
+                                                    <PanelBody
+                                                        initialOpen={false}
+                                                        title={<span className='h-4' />}
+                                                    >
                                                         <div className='my-2'>
                                                             <div className='my-2 p-2 border-solid border-2 border-light-blue-500'>
                                                                 <TextControl
@@ -133,28 +155,70 @@ registerBlockType('agency/navigation-menu', {
                                                                 </Button>
                                                             </div>
 
-                                                            {item.subItems && item.trigger && item.subItems.map((subItem, subIndex) => (
-                                                                <PanelBody initialOpen={false} title={subItem.label}>
-                                                                    <div className='p-2 border-solid border-2 border-light-blue-500'>
-                                                                        <TextControl
-                                                                            label='SubItem Label'
-                                                                            value={subItem.label}
-                                                                            onChange={(value: string) => updateSubItem(index, subIndex, 'label', value)}
-                                                                        />
-                                                                        <TextControl
-                                                                            label='SubItem Link'
-                                                                            value={subItem.link}
-                                                                            onChange={(value: string) => updateSubItem(index, subIndex, 'link', value)}
-                                                                        />
-                                                                        <Button
-                                                                            isPrimary
-                                                                            onClick={() => removeSubItem(index, subIndex)}
-                                                                        >
-                                                                            Remove Subitem
-                                                                        </Button>
-                                                                    </div>
-                                                                </PanelBody>
-                                                            ))}
+                                                            {item.trigger &&
+                                                                <Droppable
+                                                                    droppableId={`subItems-${index}`}
+                                                                    type="SUBITEM"
+                                                                >
+                                                                    {(provided) => (
+                                                                        <div ref={provided.innerRef} {...provided.droppableProps}>
+                                                                            {item.subItems.map((subItem, subIndex) => (
+                                                                                <Draggable
+                                                                                    key={subIndex}
+                                                                                    draggableId={`subItem-${index}-${subIndex}`}
+                                                                                    index={subIndex}
+                                                                                >
+                                                                                    {(provided) => (
+                                                                                        <div
+                                                                                            className='relative'
+                                                                                            ref={provided.innerRef}
+                                                                                            {...provided.draggableProps}
+                                                                                        >
+                                                                                            <div
+                                                                                                className='flex absolute z-50 top-4 left-4'
+                                                                                                {...provided.dragHandleProps}
+                                                                                            >
+                                                                                                <Move className="w-4 h-4" />
+                                                                                            </div>
+                                                                                            <span
+                                                                                                className='absolute top-4 left-1/2 -translate-x-1/2 max-w-[calc(100%-6rem)] font-medium truncate'
+                                                                                            >
+                                                                                                {subItem.label}
+                                                                                            </span>
+
+                                                                                            <PanelBody
+                                                                                                initialOpen={false}
+                                                                                                title={<span className='h-4' />}
+                                                                                            >
+                                                                                                <div className='p-2 border-solid border-2 border-light-blue-500'>
+                                                                                                    <TextControl
+                                                                                                        label='SubItem Label'
+                                                                                                        value={subItem.label}
+                                                                                                        onChange={(value: string) => updateSubItem(index, subIndex, 'label', value)}
+                                                                                                    />
+                                                                                                    <TextControl
+                                                                                                        label='SubItem Link'
+                                                                                                        value={subItem.link}
+                                                                                                        onChange={(value: string) => updateSubItem(index, subIndex, 'link', value)}
+                                                                                                    />
+                                                                                                    <Button
+                                                                                                        isPrimary
+                                                                                                        onClick={() => removeSubItem(index, subIndex)}
+                                                                                                    >
+                                                                                                        Remove Subitem
+                                                                                                    </Button>
+                                                                                                </div>
+                                                                                            </PanelBody>
+                                                                                        </div>
+                                                                                    )}
+                                                                                </Draggable>
+                                                                            ))}
+                                                                            {provided.placeholder}
+                                                                        </div>
+                                                                    )}
+                                                                </Droppable>
+                                                            }
+
                                                             {item.trigger &&
                                                                 <div className='my-2'>
                                                                     <Button
