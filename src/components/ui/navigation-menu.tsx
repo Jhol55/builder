@@ -19,12 +19,12 @@ export const Navbar: React.FC<{ mode: string | undefined, children: React.ReactN
   className
 }) => {
 
-  return (
+  return ( // VER SCROLLBAR
     <modeContext.Provider value={{ mode }}>
       <div className={cn(
-        'flex p-2', 
+        'flex p-2 gap-1', 
         mode === 'expand' 
-          ? 'flex-col justify-start h-[calc(100vh-12rem)] overflow-auto' 
+          ? 'flex-col justify-start h-[calc(100vh-8rem)] overflow-auto' 
           : 'flex-row justify-end h-auto', 
         className)}
       >
@@ -42,7 +42,7 @@ export const Dropdown: React.FC<{ children: React.ReactNode }> = ({ children }) 
     <OpenTabContext.Provider value={{ openTab, setOpenTab }}>
       <div
         onMouseLeave={() => mode === 'overlay' && setOpenTab(false)}
-        className={'relative flex flex-col gap-2'}
+        className={'relative flex flex-col'}
       >
         {children}
       </div>
@@ -92,7 +92,7 @@ export const Tab: React.FC<{ children: React.ReactNode; className?: string }> = 
   const { mode } = useContext(modeContext)!;
   return (
     mode === 'expand' ?
-      <div className="relative w-full">
+      <div className="relative w-full mt-1">
         <AnimatePresence initial={false}>
           {openTab && (
             <motion.div
@@ -107,7 +107,8 @@ export const Tab: React.FC<{ children: React.ReactNode; className?: string }> = 
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className={cn('flex flex-col gap-2 p-2 rounded-md border border-neutral-200 mb-2 backdrop-blur-xl transition-all duration-300 dark:border-neutral-800',
+                className={cn(
+                  'flex flex-col gap-2 p-2 rounded-md border border-neutral-200 backdrop-blur-xl transition-all duration-300 dark:border-neutral-800',
                   className
                 )}
               >
@@ -145,7 +146,6 @@ export const Tab: React.FC<{ children: React.ReactNode; className?: string }> = 
                     transition={{ duration: 0.2 }}>
                     {children}
                   </motion.div>
-
                 </motion.div>
               )}
             </AnimatePresence>
