@@ -1,3 +1,4 @@
+import './style.css';
 
 const blocksContext = require.context('./blocks', true, /block\.tsx$/);
 

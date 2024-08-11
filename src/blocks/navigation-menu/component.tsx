@@ -3,23 +3,13 @@ import { cn } from '@/lib/utils';
 import { useMediaQuery } from '@reactuses/core';
 import { Drawer, DrawerContent, DrawerTrigger, DrawerTitle } from '@/components/ui/drawer';
 import { MenuIcon } from 'lucide-react';
-import { Navbar, Dropdown, Tab, Trigger, TabLink, Link } from '@/components/ui/navigation-menu';
+import { Navbar, Dropdown, Tab, Trigger, Link, Button } from '@/components/ui/navigation-menu';
 
-interface SubItem {
-    label: string;
-    link: string;
-}
-
-interface Items {
-    label: string;
-    trigger: boolean
-    link: string
-    subItems?: SubItem[];
-}
+import { AttributesProps } from './types'
 
 interface ComponentProps {
     mode: 'expand' | 'overlay' | undefined;
-    items: Items[];
+    attributes: AttributesProps;
     className?: string
 }
 
@@ -59,34 +49,42 @@ const Wrapper = (Component: React.ComponentType<ComponentProps>) => memo((props:
             <Component {...props} mode='overlay' className={cn((isLoading || !isDesktop) && 'hidden')} />
         </>
     )
-})
+});
 
 
-const Component = memo(({ items, mode, className }: ComponentProps) => {
+const Component = memo(({ attributes, mode, className }: ComponentProps) => {
     return (
-        <Navbar mode={mode} className={className}>
-            {items.map((item, index) => (
+        <Navbar
+            mode={mode}
+            className={className}
+            style={attributes.styles.navbar}
+        >
+            {attributes.items.map((item, index) => (
                 item.trigger ? (
                     <Dropdown key={index}>
-                        <Trigger>{item.label}</Trigger>
-                        <Tab>
+                        <Trigger style={attributes.styles.buttons}>
+                            {item.label}
+                        </Trigger>
+                        <Tab style={attributes.styles.dropdown}>
                             {item.subItems?.map((subItem, subIndex) => (
-                                <TabLink
+                                <Link
                                     key={subIndex}
                                     href={subItem.link}
+                                    style={attributes.styles.link}
                                 >
                                     {subItem.label}
-                                </TabLink>
+                                </Link>
                             ))}
                         </Tab>
                     </Dropdown>
                 ) : (
-                    <Link
+                    <Button
                         key={index}
                         href={item.link}
+                        style={attributes.styles.buttons}
                     >
                         {item.label}
-                    </Link>
+                    </Button>
                 )
             ))}
         </Navbar>

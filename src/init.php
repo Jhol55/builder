@@ -33,9 +33,8 @@ function multi_block_cgb_block_assets() {
 		array(),
 		filemtime( plugin_dir_path( __DIR__ ) . 'dist/frontend.css' )
 	);
-} // End function multi_block_cgb_block_assets().
+} 
 
-// Hook: Frontend assets.
 add_action( 'enqueue_block_assets', 'multi_block_cgb_block_assets' );
 
 /**
@@ -49,18 +48,18 @@ add_action( 'enqueue_block_assets', 'multi_block_cgb_block_assets' );
  */
 function multi_block_cgb_editor_assets() {
 	wp_enqueue_script(
-		'multi_block-cgb-block-js', // Handle.
-		plugins_url( '/dist/blocks.build.js', dirname( __FILE__ ) ), // Block.build.js: We register the block here. Built with Webpack.
-		array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor' ) // Dependencies, defined above.
-		// filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.build.js' ) // Version: File modification time.
+		'multi_block-cgb-block-js',
+		plugins_url( '/dist/blocks.build.js', dirname( __FILE__ ) ),
+		array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor' ),
+		filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.build.js' ),
+		true
 	);
 	wp_enqueue_style(
 		'multi_block-cgb-block-editor-css',
 		plugins_url( 'dist/blocks.css', dirname( __FILE__ ) ),
-		array( 'wp-edit-blocks' ), // Dependency to include the CSS after it.
+		array( 'wp-edit-blocks' ),
 		filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.css' )
 	);
-} // End function multi_block_cgb_editor_assets().
+}
 
-// Hook: Editor assets.
 add_action( 'enqueue_block_editor_assets', 'multi_block_cgb_editor_assets' );

@@ -1,4 +1,3 @@
-import '../../style.css';
 import Component from './component';
 import { hydrateRoot } from 'react-dom/client';
 
@@ -7,11 +6,11 @@ window.addEventListener('DOMContentLoaded', () => {
     const elements = document.querySelectorAll('#asd');
 
     elements.forEach(element => {
-        const items = JSON.parse(element.getAttribute('data-items') || '[]');
+        const attributes = JSON.parse(element.getAttribute('data-attributes') || '{}');
 
         hydrateRoot(element, 
             <Component 
-                items={items}  
+                attributes={attributes}  
                 mode={undefined}
             />
         );

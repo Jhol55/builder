@@ -13,20 +13,22 @@ const modeContext = createContext<{
   mode: string | undefined;
 } | undefined>(undefined);
 
-export const Navbar: React.FC<{ mode: string | undefined, children: React.ReactNode, className?: string }> = ({
+export const Navbar: React.FC<{ mode: string | undefined, children: React.ReactNode, className?: string, style?: object }> = ({
   mode,
   children,
-  className
+  className,
+  style
 }) => {
-
   return (
     <modeContext.Provider value={{ mode }}>
-      <div className={cn(
-        'flex p-2 gap-1', 
-        mode === 'expand' 
-          ? 'flex-col justify-start h-[calc(100vh-8rem)] overflow-scroll' 
-          : 'flex-row justify-end h-auto', 
-        className)}
+      <div
+        style={style}
+        className={cn(
+          'flex p-2 gap-1',
+          mode === 'expand'
+            ? 'flex-col justify-start h-[calc(100vh-8rem)] overflow-scroll'
+            : 'flex-row justify-end h-auto',
+          className)}
       >
         {children}
       </div>
@@ -50,18 +52,30 @@ export const Dropdown: React.FC<{ children: React.ReactNode }> = ({ children }) 
   );
 };
 
-export const Trigger: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const Trigger: React.FC<{ 
+  children: React.ReactNode, style?: { color: string, hoverColor: string, hoverBackgroundColor: string, backgroundColor: string } 
+}> = ({
+  children,
+  style
+}) => {
   const { openTab, setOpenTab } = useContext(OpenTabContext)!;
   const { mode } = useContext(modeContext)!;
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <button
-      onMouseEnter={() => mode === 'overlay' && setOpenTab(true)}
       onClick={() => setOpenTab(mode === 'expand' && openTab ? false : true)}
       className={cn(
-        'flex h-10 items-center gap-0.5 rounded-md px-4 py-2 text-sm font-medium text-neutral-950 transition-colors dark:text-white hover:bg-neutral-100 hover:dark:bg-neutral-800',
+        'flex h-10 items-center gap-0.5 rounded-md px-4 py-2 text-sm font-medium text-neutral-950 transition-colors dark:text-white',
         openTab && 'bg-neutral-100 dark:bg-neutral-800 [&>svg]:rotate-180'
       )}
+      style={{
+        ...style,
+        color: isHovered ? style?.hoverColor : style?.color,
+        backgroundColor: isHovered ? style?.hoverBackgroundColor : style?.backgroundColor
+      }}
+      onMouseEnter={() => { mode === 'overlay' && setOpenTab(true); setIsHovered(true) }}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <span>{children}</span>
       <svg
@@ -84,15 +98,19 @@ export const Trigger: React.FC<{ children: React.ReactNode }> = ({ children }) =
 };
 
 
-export const Tab: React.FC<{ children: React.ReactNode; className?: string }> = ({
+export const Tab: React.FC<{ children: React.ReactNode; className?: string, style?: object }> = ({
   children,
   className,
+  style
 }) => {
   const { openTab } = useContext(OpenTabContext)!;
   const { mode } = useContext(modeContext)!;
   return (
     mode === 'expand' ?
-      <div className="relative w-full mt-1">
+      <div
+        className="relative w-full mt-1"
+        style={style}
+      >
         <AnimatePresence initial={false}>
           {openTab && (
             <motion.div
@@ -118,18 +136,20 @@ export const Tab: React.FC<{ children: React.ReactNode; className?: string }> = 
           )}
         </AnimatePresence>
       </div>
-    :
+      :
       <motion.div
         id="overlay-content"
         className="absolute left-0 top-[calc(100%_+_6px)] w-auto"
         initial={{ opacity: 0, scale: 0.98 }}
-        animate={ openTab ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.98 }}>
+        animate={openTab ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.98 }}>
         <div className="absolute -top-[6px] left-0 right-0 h-[6px]" />
         <div
           className={cn(
             'rounded-md border border-neutral-200 backdrop-blur-xl transition-all duration-300 dark:border-neutral-800',
             className
-          )}>
+          )}
+          style={style}
+        >
           <div className="overflow-hidden">
             <AnimatePresence>
               {openTab && (
@@ -155,33 +175,55 @@ export const Tab: React.FC<{ children: React.ReactNode; className?: string }> = 
   );
 };
 
-export const TabLink: React.FC<{ children: React.ReactNode, href: string }> = ({
+export const Link: React.FC<{ 
+  children: React.ReactNode, href: string, style?: { color: string, hoverColor: string, hoverBackgroundColor: string, backgroundColor: string } 
+}> = ({
   children,
-  href
+  href,
+  style
 }) => {
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <a
       href={href}
-      className='px-2 py-1 text-sm decoration-none rounded-md text-sm font-medium text-neutral-500 hover:bg-neutral-100 hover:dark:bg-neutral-800'
+      className='px-2 py-1 text-sm decoration-none rounded-md text-sm font-medium'
+      style={{
+        ...style,
+        color: isHovered ? style?.hoverColor : style?.color,
+        backgroundColor: isHovered ? style?.hoverBackgroundColor : style?.backgroundColor
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {children}
     </a>
   )
 };
 
-export const Link: React.FC<{ children: React.ReactNode, href: string }> = ({
+export const Button: React.FC<{ 
+  children: React.ReactNode, href: string, style?: { color: string, hoverColor: string, hoverBackgroundColor: string, backgroundColor: string } 
+}> = ({
   children,
-  href
+  href,
+  style
 }) => {
   const { mode } = useContext(modeContext)!;
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <a
       href={href}
       className={cn(
         mode === 'expand' ? 'w-full' : 'w-auto items-center justify-center',
-        'inline-flex h-10 rounded-md bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground no-underline')}
+        'inline-flex h-10 rounded-md bg-background px-4 py-2 text-sm font-medium no-underline')}
+      style={{
+        ...style,
+        color: isHovered ? style?.hoverColor : style?.color,
+        backgroundColor: isHovered ? style?.hoverBackgroundColor : style?.backgroundColor
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {children}
     </a>

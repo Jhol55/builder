@@ -88,7 +88,7 @@
   background-clip: padding-box;
 }
 
-*:focus {
+.components-panel__body-toggle:focus {
   outline: none !important;
   box-shadow: none !important;
   border: none !important;
