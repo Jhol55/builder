@@ -156,7 +156,7 @@ export const Settings = ({ attributes, setAttributes }: BlockProps) => {
                                                                                         {subItem.label}
                                                                                     </span>
 
-                                                                                    <div className='border-solid border-l-[1px] border-r-[1px] border-b-[1px] border-light-blue-500'>
+                                                                                    <div className={`border-solid border-l-[1px] border-r-[1px] ${subIndex === item.subItems.length - 1 && 'border-b-[1px]'} border-light-blue-500`}>
                                                                                         <PanelBody
                                                                                             initialOpen={false}
                                                                                             title={<span className='h-4' />}

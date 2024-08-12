@@ -51,7 +51,6 @@ const Wrapper = (Component: React.ComponentType<ComponentProps>) => memo((props:
     )
 });
 
-
 const Component = memo(({ attributes, mode, className }: ComponentProps) => {
     return (
         <Navbar

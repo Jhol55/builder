@@ -9,21 +9,6 @@ import { BlockProps } from './types'
 import { Styles } from './styles';
 import { Settings } from './settings';
 
-const padding = {
-    padding: '',
-    paddingTop: '',
-    paddingBottom: '',
-    paddingLeft: '',
-    paddingRight: ''
-}
-
-const colors = {
-    color: '',
-    hoverColor: '',
-    backgroundColor: '',
-    hoverBackgroundColor: '',
-}
-
 registerBlockType('agency/navigation-menu', {
     title: __('Navigation Menu', 'Navigation Menu'),
     icon: 'menu',
@@ -32,26 +17,7 @@ registerBlockType('agency/navigation-menu', {
         items: { type: 'array', default: [] },
         styles: {
             type: 'object',
-            default: {
-                navbar: {
-                    gap: '',
-                    padding,
-                    backgroundColor: '',             
-                },
-                buttons: {
-                    colors,
-                    padding
-                },
-                dropdown: {
-                    backgroundColor: '',
-                    padding
-                },
-                link: {
-                    colors,
-                    padding
-                }
-
-            }
+            default: {}
         },
     },
 
