@@ -8,6 +8,8 @@ import { ColorPanel } from '@/components/wp/ColorPanel';
 import { HoverColorPanel } from '@/components/wp/HoverColorPanel';
 import { HoverBackgroundColorPanel } from '@/components/wp/HoverBackgroundColor';
 import { WrapperControls } from '@/components/wp/WrapperControls';
+import { WidthPanel } from '@/components/wp/WidthPanel';
+import { BorderPanel } from '@/components/wp/BorderPanel';
 
 export const Styles = ({ attributes, setAttributes }: BlockProps) => {
     return (
@@ -28,6 +30,11 @@ export const Styles = ({ attributes, setAttributes }: BlockProps) => {
                     setAttributes={setAttributes}
                     block='navigationMenu'
                     component='navbar' />
+                <BorderPanel
+                    attributes={attributes}
+                    setAttributes={setAttributes}
+                    block='navigationMenu'
+                    component='navbar' />
                 <BackgroundColorPanel
                     attributes={attributes}
                     setAttributes={setAttributes}
@@ -35,6 +42,26 @@ export const Styles = ({ attributes, setAttributes }: BlockProps) => {
                     component='navbar' />
             </WrapperPanel>
             <WrapperPanel title='Buttons'>
+                <WidthPanel
+                    attributes={attributes}
+                    setAttributes={setAttributes}
+                    block='navigationMenu'
+                    component='buttons' />
+                <HeightPanel
+                    attributes={attributes}
+                    setAttributes={setAttributes}
+                    block='navigationMenu'
+                    component='buttons' />
+                <PaddingPanel
+                    attributes={attributes}
+                    setAttributes={setAttributes}
+                    block='navigationMenu'
+                    component='buttons' />
+                <BorderPanel
+                    attributes={attributes}
+                    setAttributes={setAttributes}
+                    block='navigationMenu'
+                    component='buttons' />
                 <ColorPanel
                     attributes={attributes}
                     setAttributes={setAttributes}
@@ -55,19 +82,29 @@ export const Styles = ({ attributes, setAttributes }: BlockProps) => {
                     setAttributes={setAttributes}
                     block='navigationMenu'
                     component='buttons' />
-                <PaddingPanel
+            </WrapperPanel>
+            <WrapperPanel title='Dropdown'>
+                <WidthPanel
                     attributes={attributes}
                     setAttributes={setAttributes}
                     block='navigationMenu'
-                    component='buttons' />
-            </WrapperPanel>
-            <WrapperPanel title='Dropdown'>
-                <BackgroundColorPanel
+                    component='dropdown' />
+                <GapPanel
                     attributes={attributes}
                     setAttributes={setAttributes}
                     block='navigationMenu'
                     component='dropdown' />
                 <PaddingPanel
+                    attributes={attributes}
+                    setAttributes={setAttributes}
+                    block='navigationMenu'
+                    component='dropdown' />
+                <BorderPanel
+                    attributes={attributes}
+                    setAttributes={setAttributes}
+                    block='navigationMenu'
+                    component='dropdown' />
+                <BackgroundColorPanel
                     attributes={attributes}
                     setAttributes={setAttributes}
                     block='navigationMenu'
@@ -95,6 +132,11 @@ export const Styles = ({ attributes, setAttributes }: BlockProps) => {
                     block='navigationMenu'
                     component='link' />
                 <PaddingPanel
+                    attributes={attributes}
+                    setAttributes={setAttributes}
+                    block='navigationMenu'
+                    component='link' />
+                <BorderPanel
                     attributes={attributes}
                     setAttributes={setAttributes}
                     block='navigationMenu'

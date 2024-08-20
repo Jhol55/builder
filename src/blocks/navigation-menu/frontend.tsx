@@ -1,6 +1,6 @@
-import Component from './component';
 import { hydrateRoot } from 'react-dom/client';
 
+import Component from './component';
 
 window.addEventListener('DOMContentLoaded', () => {
     const elements = document.querySelectorAll('#asd');

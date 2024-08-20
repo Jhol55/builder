@@ -1,8 +1,10 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
+  mode: 'production',
   entry: {
     blocks: './src/blocks.js',
     frontend: './src/frontend.js'
@@ -47,7 +49,18 @@ module.exports = {
     maxAssetSize: 512000
   },
   optimization: {
+    minimize: true,
     minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          compress: true,
+          mangle: {
+            toplevel: true,
+          },
+        },
+        extractComments: false,
+        parallel: true,
+      }),
       `...`,
       new CssMinimizerPlugin(),
     ],

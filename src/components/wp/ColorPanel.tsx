@@ -22,7 +22,6 @@ export const ColorPanel = <Block extends keyof StylesProps>({
         <ColorPicker
             color={attributes.styles[component]?.color}
             onChangeComplete={(color: { hex: string }) => updateStyle(attributes, setAttributes, component, 'color', color.hex)}
-            disableAlpha
         />
     </PanelBody>
 );

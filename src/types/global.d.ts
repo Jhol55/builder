@@ -21,10 +21,21 @@ interface HeightProps {
     maxHeight: string,
 }
 
-interface WidthProps { //CRIAR O PANEL DESSE ----------------------------------------------------------------------------------
+interface WidthProps {
     width: string,
     minWidth: string,
     maxWidth: string,
+}
+
+interface BorderProps {
+    borderWidth: string
+    borderTopWidth: string
+    borderBottomWidth: string
+    borderRightWidth: string
+    borderLeftWidth: string
+    borderStyle: string
+    borderRadius: string
+    borderColor: string
 }
 
 declare interface StylesProps {
@@ -33,13 +44,14 @@ declare interface StylesProps {
             gap: string,
             backgroundColor: string,
             color: string
-        } & HeightProps & PaddingProps,
+        } & HeightProps & PaddingProps & BorderProps,
         buttons: {
-        } & ColorProps & WidthProps & PaddingProps,
+        } & ColorProps & WidthProps & HeightProps & PaddingProps & BorderProps,
         dropdown: {
+            gap: string
             backgroundColor: string,
-        } & PaddingProps,
+        } & PaddingProps & WidthProps & BorderProps,
         link: {
-        } & ColorProps & PaddingProps
+        } & ColorProps & PaddingProps & BorderProps
     }
 }

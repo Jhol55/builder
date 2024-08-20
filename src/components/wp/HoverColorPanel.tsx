@@ -22,7 +22,6 @@ export const HoverColorPanel = <Block extends keyof StylesProps>({
         <ColorPicker
             color={attributes.styles[component]?.hoverColor}
             onChangeComplete={(color: { hex: string }) => updateStyle(attributes, setAttributes, component, 'hoverColor', color.hex)}
-            disableAlpha
         />
     </PanelBody>
 )

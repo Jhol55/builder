@@ -1,13 +1,70 @@
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { Move } from 'lucide-react'
+import { Move } from 'lucide-react';
+import { BlockProps, ItemProps, SubItemProps, ItemPanelProps, SubItemPanelProps } from './types';
 
 const { InspectorControls } = wp.blockEditor;
 const { PanelBody, ToggleControl, TextControl, Button } = wp.components;
-import { BlockProps, ItemProps, SubItemProps } from './types'
 
+const ItemPanel = ({ item, index, updateItem, removeItem, addSubItem, subItems }: ItemPanelProps) => (
+    <PanelBody initialOpen={false} title={<span className='h-4' />}>
+        <div className='my-2 p-2 border-solid border-[1px] border-light-blue-500'>
+            <TextControl
+                label='Item Label'
+                value={item.label}
+                onChange={(value: string) => updateItem(index, 'label', value)}
+            />
+            <ToggleControl
+                label='Trigger'
+                checked={item.trigger}
+                onChange={(value: boolean) => updateItem(index, 'trigger', value)}
+            />
+            {!item.trigger && (
+                <TextControl
+                    label='Item Link'
+                    value={item.link}
+                    onChange={(value: string) => updateItem(index, 'link', value)}
+                />
+            )}
+            <Button isPrimary onClick={() => removeItem(index)}>
+                Remove Item
+            </Button>
+        </div>
+        {item.trigger && (
+            <>
+                {subItems}
+                <div className='mt-2'>
+                    <Button isSecondary onClick={() => addSubItem(index)}>
+                        Add SubItem
+                    </Button>
+                </div>
+            </>
+        )}
+    </PanelBody>
+);
+
+const SubItemPanel = ({ subItem, itemIndex, subIndex, updateSubItem, removeSubItem }: SubItemPanelProps) => (
+    <div className='border-solid border-l-[1px] border-r-[1px] border-b-[1px] border-light-blue-500'>
+        <PanelBody initialOpen={false} title={<span className='h-4' />}>
+            <div className='p-2 border-solid border-[1px] border-light-blue-500'>
+                <TextControl
+                    label='SubItem Label'
+                    value={subItem.label}
+                    onChange={(value: string) => updateSubItem(itemIndex, subIndex, 'label', value)}
+                />
+                <TextControl
+                    label='SubItem Link'
+                    value={subItem.link}
+                    onChange={(value: string) => updateSubItem(itemIndex, subIndex, 'link', value)}
+                />
+                <Button isPrimary onClick={() => removeSubItem(itemIndex, subIndex)}>
+                    Remove Subitem
+                </Button>
+            </div>
+        </PanelBody>
+    </div>
+);
 
 export const Settings = ({ attributes, setAttributes }: BlockProps) => {
-
     const onDragEnd = (result: DropResult) => {
         if (!result.destination) return;
 
@@ -61,166 +118,103 @@ export const Settings = ({ attributes, setAttributes }: BlockProps) => {
         setAttributes({ ...attributes, items: newItems });
     };
 
+    const renderSubItems = (item: ItemProps, index: number) => (
+        <Droppable droppableId={`subItems-${index}`} type="SUBITEM">
+            {(provided) => (
+                <div ref={provided.innerRef} {...provided.droppableProps}>
+                    {item.subItems.map((subItem, subIndex) => (
+                        <Draggable
+                            key={subIndex}
+                            draggableId={`subItem-${index}-${subIndex}`}
+                            index={subIndex}
+                        >
+                            {(provided) => (
+                                <div
+                                    className='relative'
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                >
+                                    <div
+                                        className='flex absolute z-50 top-4 left-4'
+                                        {...provided.dragHandleProps}
+                                    >
+                                        <Move className="w-4 h-4" />
+                                    </div>
+                                    <span
+                                        className='absolute top-4 left-1/2 -translate-x-1/2 max-w-[calc(100%-6rem)] font-medium truncate'
+                                    >
+                                        {subItem.label}
+                                    </span>
+                                    <SubItemPanel
+                                        subItem={subItem}
+                                        itemIndex={index}
+                                        subIndex={subIndex}
+                                        updateSubItem={updateSubItem}
+                                        removeSubItem={removeSubItem}
+                                    />
+                                </div>
+                            )}
+                        </Draggable>
+                    ))}
+                    {provided.placeholder}
+                </div>
+            )}
+        </Droppable>
+    );
+
+    const renderItem = (item: ItemProps, index: number) => (
+        <Draggable
+            key={index}
+            draggableId={`item-${index}`}
+            index={index}
+        >
+            {(provided) => (
+                <div
+                    className={`relative ${index === attributes.items.length - 1 && 'border-solid border-b-[1px] border-light-blue-500'}`}
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                >
+                    <div
+                        className='flex absolute z-50 top-4 left-4'
+                        {...provided.dragHandleProps}
+                    >
+                        <Move className="w-4 h-4" />
+                    </div>
+                    <span
+                        className='absolute top-4 left-1/2 -translate-x-1/2 max-w-[calc(100%-6rem)] font-medium	truncate'
+                    >
+                        {item.label}
+                    </span>
+                    <ItemPanel
+                        item={item}
+                        index={index}
+                        updateItem={updateItem}
+                        removeItem={removeItem}
+                        addSubItem={addSubItem}
+                        subItems={renderSubItems(item, index)}
+                    />
+                </div>
+            )}
+        </Draggable>
+    );
+
     return (
         <InspectorControls group='settings'>
             <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId="items">
                     {(provided) => (
-                        <div
-                            className='mt-1'
-                            {...provided.droppableProps}
-                            ref={provided.innerRef}
-                        >
-                            {attributes.items.map((item, index) => (
-                                <Draggable
-                                    key={index}
-                                    draggableId={`item-${index}`}
-                                    index={index}
-                                >
-                                    {(provided) => (
-                                        <div
-                                            className={`relative ${index === attributes.items.length - 1 && 'border-solid border-b-[1px] border-light-blue-500'}`}
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                        >
-                                            <div
-                                                className='flex absolute z-50 top-4 left-4'
-                                                {...provided.dragHandleProps}
-                                            >
-                                                <Move className="w-4 h-4" />
-                                            </div>
-                                            <span
-                                                className='absolute top-4 left-1/2 -translate-x-1/2 max-w-[calc(100%-6rem)] font-medium truncate'
-                                            >
-                                                {item.label}
-                                            </span>
-                                            <PanelBody
-                                                initialOpen={false}
-                                                title={<span className='h-4' />}
-                                            >
-                                                <div className='my-2'>
-                                                    <div className='my-2 p-2 border-solid border-[1px] border-light-blue-500'>
-                                                        <TextControl
-                                                            label='Item Label'
-                                                            value={item.label}
-                                                            onChange={(value: string) => updateItem(index, 'label', value)}
-                                                        />
-                                                        <ToggleControl
-                                                            label='Trigger'
-                                                            checked={item.trigger}
-                                                            onChange={(value: boolean) => updateItem(index, 'trigger', value)}
-                                                        />
-                                                        {!item.trigger &&
-                                                            <TextControl
-                                                                label='Item Link'
-                                                                value={item.link}
-                                                                onChange={(value: string) => updateItem(index, 'link', value)}
-                                                            />
-                                                        }
-                                                        <Button
-                                                            isPrimary
-                                                            onClick={() => removeItem(index)}
-                                                        >
-                                                            Remove Button
-                                                        </Button>
-                                                    </div>
-
-                                                    {item.trigger &&
-                                                        <Droppable
-                                                            droppableId={`subItems-${index}`}
-                                                            type="SUBITEM"
-                                                        >
-                                                            {(provided) => (
-                                                                <div ref={provided.innerRef} {...provided.droppableProps}>
-                                                                    {item.subItems.map((subItem, subIndex) => (
-                                                                        <Draggable
-                                                                            key={subIndex}
-                                                                            draggableId={`subItem-${index}-${subIndex}`}
-                                                                            index={subIndex}
-                                                                        >
-                                                                            {(provided) => (
-                                                                                <div
-                                                                                    className='relative'
-                                                                                    ref={provided.innerRef}
-                                                                                    {...provided.draggableProps}
-                                                                                >
-                                                                                    <div
-                                                                                        className='flex absolute z-50 top-4 left-4'
-                                                                                        {...provided.dragHandleProps}
-                                                                                    >
-                                                                                        <Move className="w-4 h-4" />
-                                                                                    </div>
-                                                                                    <span
-                                                                                        className='absolute top-4 left-1/2 -translate-x-1/2 max-w-[calc(100%-6rem)] font-medium truncate'
-                                                                                    >
-                                                                                        {subItem.label}
-                                                                                    </span>
-
-                                                                                    <div className={`border-solid border-l-[1px] border-r-[1px] ${subIndex === item.subItems.length - 1 && 'border-b-[1px]'} border-light-blue-500`}>
-                                                                                        <PanelBody
-                                                                                            initialOpen={false}
-                                                                                            title={<span className='h-4' />}
-                                                                                        >
-                                                                                            <div className='p-2 border-solid border-[1px] border-light-blue-500'>
-                                                                                                <TextControl
-                                                                                                    label='SubItem Label'
-                                                                                                    value={subItem.label}
-                                                                                                    onChange={(value: string) => updateSubItem(index, subIndex, 'label', value)}
-                                                                                                />
-                                                                                                <TextControl
-                                                                                                    label='SubItem Link'
-                                                                                                    value={subItem.link}
-                                                                                                    onChange={(value: string) => updateSubItem(index, subIndex, 'link', value)}
-                                                                                                />
-                                                                                                <Button
-                                                                                                    isPrimary
-                                                                                                    onClick={() => removeSubItem(index, subIndex)}
-                                                                                                >
-                                                                                                    Remove Subitem
-                                                                                                </Button>
-                                                                                            </div>
-                                                                                        </PanelBody>
-                                                                                    </div>
-                                                                                </div>
-                                                                            )}
-                                                                        </Draggable>
-                                                                    ))}
-                                                                    {provided.placeholder}
-                                                                </div>
-                                                            )}
-                                                        </Droppable>
-                                                    }
-
-                                                    {item.trigger &&
-                                                        <div className='mt-2'>
-                                                            <Button
-                                                                isSecondary
-                                                                onClick={() => addSubItem(index)}
-                                                            >
-                                                                Add SubItem
-                                                            </Button>
-                                                        </div>
-                                                    }
-                                                </div>
-                                            </PanelBody>
-                                        </div>
-                                    )}
-                                </Draggable>
-                            ))}
+                        <div className='mt-1' {...provided.droppableProps} ref={provided.innerRef}>
+                            {attributes.items.map(renderItem)}
                             {provided.placeholder}
                         </div>
                     )}
                 </Droppable>
             </DragDropContext>
-
             <div className='my-2 ml-4'>
-                <Button
-                    isPrimary
-                    onClick={addItem}
-                >
+                <Button isPrimary onClick={addItem}>
                     Add Item
                 </Button>
             </div>
         </InspectorControls>
-    )
-}
+    );
+};
