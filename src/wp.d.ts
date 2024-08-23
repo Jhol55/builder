@@ -3,5 +3,5 @@ declare const wp: {
     blocks: any;
     blockEditor: any;
     element: any;
-    components: any
+    components: any;
 };

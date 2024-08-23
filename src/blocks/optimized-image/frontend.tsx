@@ -1,18 +1,16 @@
 import { hydrateRoot } from 'react-dom/client';
 
-import { NavigationMenu } from './component';
+import { OptimizedImage } from './component';
+
 
 window.addEventListener('DOMContentLoaded', () => {
-  const elements = document.querySelectorAll('#asd');
+  const elements = document.querySelectorAll('#optimized-image');
 
   elements.forEach(element => {
     const attributes = JSON.parse(element.getAttribute('data-attributes') || '{}');
 
     hydrateRoot(element,
-      <NavigationMenu
-        attributes={attributes}
-        mode={undefined}
-      />
+      <OptimizedImage {...attributes} />
     );
   });
 });

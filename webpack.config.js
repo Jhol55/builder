@@ -53,7 +53,10 @@ module.exports = {
     minimizer: [
       new TerserPlugin({
         terserOptions: {
-          compress: true,
+          compress: {
+            unused: true,
+            dead_code: true,
+          },
           mangle: {
             toplevel: true,
           },
